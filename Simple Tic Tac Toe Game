@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Simple Tic Tac Toe</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 40px;
+    position: relative;
+    min-height: 100vh;
+  }
+
+  /* Tic Tac Toe grid container */
+  #board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 20px;
+    transition: filter 0.3s ease;
+  }
+
+  /* Each cell */
+  .cell {
+    width: 100px;
+    height: 100px;
+    font-size: 70px;
+    cursor: pointer;
+    border: 3px solid #333;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+  }
+
+  /* X style: blue background with white text */
+  .X {
+    background-color: #0057e7;
+    color: white;
+    animation: popin 0.3s ease;
+  }
+
+  /* O style: green background with white text */
+  .O {
+    background-color: green;
+    color: white;
+    animation: popin 0.3s ease;
+  }
+
+  /* Pop-in animation for marks */
+  @keyframes popin {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* Blur overlay shown on game end */
+  #overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(5px);
+    display: none;
+    z-index: 1000;
+  }
+
+  /* Center popup for win/draw message */
+  #popupCenter {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: green;
+    color: white;
+    padding: 25px 40px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.7);
+    font-size: 22px;
+    display: none;
+    min-width: 280px;
+    z-index: 1001;
+  }
+
+  /* Popup background color based on winner */
+  #popupCenter.win-X { background-color: #0057e7; }
+  #popupCenter.win-O { background-color: green; }
+  #popupCenter.draw { background-color: #555; }
+
+  /* Reset button inside popup */
+  #resetBtn {
+    margin-top: 20px;
+    padding: 10px 28px;
+    font-size: 18px;
+    cursor: pointer;
+    border: none;
+    border-radius: 12px;
+    background-color: red;
+    color: white;
+    transform-box: X(-50%) ;
+    cursor:pointer;
+  }
+  #resetBtn:hover {
+    background-color: green;
+  }
+
+  /* Turn message below the board */
+  #popupBottom {
+    margin: 0 auto;
+    font-size: 20px;
+    background: black;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    border: 1px solid white;
+    width: 50%; /* Change this to adjust width */
+    max-width: 300px;
+    min-height: 28px;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+
+<h1>Simple Tic Tac Toe</h1>
+
+<!-- The Tic Tac Toe grid -->
+<div id="board">
+  <div class="cell" data-index="0"></div>
+  <div class="cell" data-index="1"></div>
+  <div class="cell" data-index="2"></div>
+  <div class="cell" data-index="3"></div>
+  <div class="cell" data-index="4"></div>
+  <div class="cell" data-index="5"></div>
+  <div class="cell" data-index="6"></div>
+  <div class="cell" data-index="7"></div>
+  <div class="cell" data-index="8"></div>
+</div>
+
+<!-- Turn message below the board -->
+<div id="popupBottom">Player X's turn</div>
+
+<!-- Blur overlay when game ends -->
+<div id="overlay"></div>
+
+<!-- Center popup for winner or draw -->
+<div id="popupCenter">
+  <div id="popupMessage"></div>
+  <button id="resetBtn">Restart Game</button>
+</div>
+
+<script>
+  // Game variables
+  const board = Array(9).fill(null);
+  let currentPlayer = 'X';
+  let gameOver = false;
+
+  // DOM elements
+  const cells = document.querySelectorAll('.cell');
+  const popupCenter = document.getElementById('popupCenter');
+  const popupMessage = document.getElementById('popupMessage');
+  const resetBtn = document.getElementById('resetBtn');
+  const overlay = document.getElementById('overlay');
+  const popupBottom = document.getElementById('popupBottom');
+
+  // Winning patterns
+  const wins = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+
+  // Check if current player wins
+  function checkWin() {
+    return wins.some(pattern => 
+      pattern.every(index => board[index] === currentPlayer)
+    );
+  }
+
+  // Check if board is full
+  function isBoardFull() {
+    return board.every(cell => cell !== null);
+  }
+
+  // Update bottom turn message
+  function updateTurnMessage() {
+    if (!gameOver) {
+      popupBottom.textContent = `Player ${currentPlayer}'s turn`;
+    } else {
+      popupBottom.textContent = '';
+    }
+  }
+
+  // Show popup with message and styles
+  function showPopup(message, winnerClass) {
+    popupMessage.textContent = message;
+    popupCenter.className = ''; // remove all classes
+    if(winnerClass) popupCenter.classList.add(winnerClass);
+    popupCenter.style.display = 'block';
+    overlay.style.display = 'block';
+  }
+
+  // Hide popup and overlay
+  function hidePopup() {
+    popupCenter.style.display = 'none';
+    overlay.style.display = 'none';
+  }
+
+  // Handle cell click
+  function handleClick(e) {
+    if (gameOver) return;  // Don't allow moves after game ends
+
+    const index = e.target.getAttribute('data-index');
+    if (board[index]) return; // Already filled cell
+
+    // Mark the board and cell
+    board[index] = currentPlayer;
+    e.target.textContent = currentPlayer;
+    e.target.classList.add(currentPlayer);
+
+    // Check win or draw
+    if (checkWin()) {
+      gameOver = true;
+      showPopup(`Player ${currentPlayer} wins!`, `win-${currentPlayer}`);
+      updateTurnMessage();
+    } else if (isBoardFull()) {
+      gameOver = true;
+      showPopup(`It's a draw!`, 'draw');
+      updateTurnMessage();
+    } else {
+      // Switch player
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      updateTurnMessage();
+    }
+  }
+
+  // Reset game
+  resetBtn.onclick = function() {
+    board.fill(null);
+    cells.forEach(cell => {
+      cell.textContent = '';
+      cell.classList.remove('X', 'O');
+    });
+    currentPlayer = 'X';
+    gameOver = false;
+    hidePopup();
+    updateTurnMessage();
+  }
+
+  // Add event listeners to each cell
+  cells.forEach(cell => cell.addEventListener('click', handleClick));
+
+  // Initial message
+  updateTurnMessage();
+</script>
+
+</body>
+</html>
