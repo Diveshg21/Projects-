@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Color Clicker</title>
+  <style>
+    body {
+      text-align: center;
+      padding-top: 100px;
+      font-family: sans-serif;
+      transition: 0.3s;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    /* Popup message box */
+    #popup {
+      display: none;
+      font-size: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+    }
+    /* Progress bar container */
+    #barBox {
+      display: none;
+      width: 320px;
+      height: 22px;
+      background: #eee;
+      border-radius: 12px;
+      position: fixed;
+      top: 70%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 2px solid #888;
+      overflow: hidden;
+    }
+    /* The animated bar */
+    #bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, crimson, purple);
+      border-radius: 12px;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.5s;
+    }
+    /* Button colors */
+    .red { background-color: red; color: white; }
+    .blue { background-color: royalblue; color: white; }
+    .yellow { background-color: yellow; color: black; }
+    /* Simple hover effects */
+    .red:hover { background-color: darkred; }
+    .blue:hover { background-color: darkblue; }
+    .yellow:hover { background-color: gold; }
+
+    /* Wait text styles */
+    .wait { color: red; }
+    .wait:hover { color: green; }
+    .wait:active { color: blue; }
+  </style>
+</head>
+<body>
+
+  <!-- Color buttons -->
+  <button onclick="clicked('Red', 'red', this)" class="red">Red</button>
+  <button onclick="clicked('Blue', 'royalblue', this)" class="blue">Blue</button>
+  <button onclick="clicked('Yellow', 'yellow', this)" class="yellow">Yellow</button>
+
+  <!-- Popup and progress bar -->
+  <div id="popup">
+    <span id="text"></span><br>
+    <span class="wait">WAIT</span>
+  </div>
+  <div id="barBox">
+    <div id="bar"></div>
+  </div>
+
+  <script>
+    // This function runs when a color button is clicked
+    function clicked(name, color, btn) {
+      // Change the background color
+      document.body.style.background = color;
+
+      // Get all visible buttons
+      let visibleBtns = Array.from(document.querySelectorAll("button")).filter(b => b.style.display !== "none");
+
+      // If this is the last button, just hide it and stop (no popup or bar)
+      if (visibleBtns.length === 1 && visibleBtns[0] === btn) {
+        btn.style.display = "none";
+        return;
+      }
+
+      // Show popup message
+      document.getElementById("text").innerHTML = `You clicked: <span style="color:${color}">${name}</span>`;
+      document.getElementById("popup").style.display = "block";
+      document.getElementById("barBox").style.display = "block";
+
+      // Hide all buttons while waiting
+      document.querySelectorAll("button").forEach(b => b.style.visibility = "hidden");
+
+      // Animate the bar from left to right
+      let bar = document.getElementById("bar");
+      bar.style.transform = "scaleX(0)";
+      let start = null;
+      let duration = 2000; // 2 seconds
+
+      function animateBar(timestamp) {
+        if (!start) start = timestamp;
+        let progress = Math.min((timestamp - start) / duration, 1);
+        bar.style.transform = `scaleX(${progress})`;
+        if (progress < 1) {
+          requestAnimationFrame(animateBar);
+        } else {
+          // When done, show buttons again, hide popup and bar, and hide the clicked button
+          setTimeout(() => {
+            btn.style.display = "none";
+            document.querySelectorAll("button").forEach(b => b.style.visibility = "visible");
+            document.getElementById("popup").style.display = "none";
+            document.getElementById("barBox").style.display = "none";
+          }, 350);
+        }
+      }
+      requestAnimationFrame(animateBar);
+    }
+  </script>
+
+</body>
+</html>
