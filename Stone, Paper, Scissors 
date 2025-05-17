@@ -25,12 +25,38 @@
       to { transform: scale(1.1); }
     }
 
-    .game-container {
-      display: flex;
+    .panel {
+      display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 30px;
+      gap: 20px;
+    }
+
+    .active {
+      display: flex;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      border: none;
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background-color: #007BFF;
+      color: white;
+    }
+
+    button:hover {
+      background-color: #3399ff;
     }
 
     .score-panel {
@@ -65,7 +91,7 @@
       font-size: 4rem;
     }
 
-    #resultPopup {
+    #resultPopup, #winnerPopup {
       position: fixed;
       top: 50%;
       left: 50%;
@@ -80,7 +106,7 @@
       box-shadow: 0 0 20px #00f;
     }
 
-    #okBtn {
+    #okBtn, #restartBtn {
       margin-top: 20px;
       padding: 8px 20px;
       font-size: 1.2rem;
@@ -91,8 +117,14 @@
       cursor: pointer;
     }
 
-    #okBtn:hover {
+    #okBtn:hover, #restartBtn:hover {
       background-color: #3399ff;
+    }
+
+    .blurred {
+      pointer-events: none;
+      opacity: 0.3;
+      filter: blur(2px);
     }
   </style>
 </head>
@@ -100,22 +132,30 @@
 
   <h1>Stone Paper Scissors</h1>
 
-  <div class="game-container">
-    <div class="score-panel">
-      You: <span id="playerScore">0</span> |
-      Computer: <span id="computerScore">0</span>
-    </div>
+  <div id="startPanel" class="panel active">
+    <input id="playerName" placeholder="Enter your name" />
+    <input id="scoreLimit" placeholder="Score limit (e.g. 3)" type="number" min="1" />
+    <button id="startGameBtn">Start Game</button>
+  </div>
 
-    <div class="choices">
-      <span data-choice="rock">✊🏻</span>
-      <span data-choice="paper">✋🏻</span>
-      <span data-choice="scissors">✌🏻</span>
-    </div>
+  <div id="gamePanel" class="panel">
+    <div id="gameContent">
+      <div class="score-panel">
+        <span id="playerNameDisplay"></span>: <span id="playerScore">0</span> |
+        Computer: <span id="computerScore">0</span>
+      </div>
 
-    <div class="vs-panel">
-      <div id="playerHand" class="hand">❔</div>
-      <div>VS</div>
-      <div id="computerHand" class="hand">❔</div>
+      <div class="choices">
+        <span data-choice="rock">✊🏻</span>
+        <span data-choice="paper">✋🏻</span>
+        <span data-choice="scissors">✌🏻</span>
+      </div>
+
+      <div class="vs-panel">
+        <div id="playerHand" class="hand">❔</div>
+        <div>VS</div>
+        <div id="computerHand" class="hand">❔</div>
+      </div>
     </div>
   </div>
 
@@ -124,18 +164,38 @@
     <button id="okBtn">OK</button>
   </div>
 
+  <div id="winnerPopup">
+    <div id="winnerMessage"></div>
+    <button id="restartBtn">Restart</button>
+  </div>
+
   <script>
+    const startPanel = document.getElementById("startPanel");
+    const gamePanel = document.getElementById("gamePanel");
+    const playerNameInput = document.getElementById("playerName");
+    const scoreLimitInput = document.getElementById("scoreLimit");
+    const startGameBtn = document.getElementById("startGameBtn");
+
+    const playerNameDisplay = document.getElementById("playerNameDisplay");
+    const playerScoreSpan = document.getElementById("playerScore");
+    const computerScoreSpan = document.getElementById("computerScore");
     const choices = document.querySelectorAll(".choices span");
     const playerHand = document.getElementById("playerHand");
     const computerHand = document.getElementById("computerHand");
-    const playerScoreSpan = document.getElementById("playerScore");
-    const computerScoreSpan = document.getElementById("computerScore");
+
     const resultPopup = document.getElementById("resultPopup");
     const resultMessage = document.getElementById("resultMessage");
     const okBtn = document.getElementById("okBtn");
 
+    const winnerPopup = document.getElementById("winnerPopup");
+    const winnerMessage = document.getElementById("winnerMessage");
+    const restartBtn = document.getElementById("restartBtn");
+
+    const gameContent = document.getElementById("gameContent");
+
     let playerScore = 0;
     let computerScore = 0;
+    let scoreLimit = 3;
 
     const handEmojis = {
       rock: "✊🏻",
@@ -168,10 +228,48 @@
       resultPopup.style.display = "block";
     };
 
-    okBtn.addEventListener("click", () => {
-      resultPopup.style.display = "none";
-      playerHand.textContent = "❔";
-      computerHand.textContent = "❔";
+    const disableChoices = () => {
+      choices.forEach(choice => choice.style.pointerEvents = "none");
+    };
+
+    const enableChoices = () => {
+      choices.forEach(choice => choice.style.pointerEvents = "auto");
+    };
+
+    const checkWinner = () => {
+      if (playerScore >= scoreLimit) {
+        winnerMessage.textContent = `${playerNameInput.value} Wins the Game!`;
+        winnerPopup.style.display = "block";
+        gameContent.classList.add("blurred");
+        disableChoices();
+      } else if (computerScore >= scoreLimit) {
+        winnerMessage.textContent = `Computer Wins the Game!`;
+        winnerPopup.style.display = "block";
+        gameContent.classList.add("blurred");
+        disableChoices();
+      }
+    };
+
+    startGameBtn.addEventListener("click", () => {
+      const name = playerNameInput.value.trim();
+      const limit = parseInt(scoreLimitInput.value);
+
+      if (!name || isNaN(limit) || limit < 1) {
+        alert("Please enter a valid name and score limit.");
+        return;
+      }
+
+      playerScore = 0;
+      computerScore = 0;
+      scoreLimit = limit;
+      playerScoreSpan.textContent = "0";
+      computerScoreSpan.textContent = "0";
+      playerNameDisplay.textContent = name;
+
+      startPanel.classList.remove("active");
+      gamePanel.classList.add("active");
+      gameContent.classList.remove("blurred");
+      enableChoices();
     });
 
     choices.forEach(choice => {
@@ -186,7 +284,32 @@
         playerScoreSpan.textContent = playerScore;
         computerScoreSpan.textContent = computerScore;
         showResultPopup(result);
+        checkWinner();
       });
+    });
+
+    okBtn.addEventListener("click", () => {
+      resultPopup.style.display = "none";
+
+      if (playerScore >= scoreLimit || computerScore >= scoreLimit) {
+        winnerPopup.style.display = "block";
+      }
+
+      playerHand.textContent = "❔";
+      computerHand.textContent = "❔";
+    });
+
+    restartBtn.addEventListener("click", () => {
+      winnerPopup.style.display = "none";
+      resultPopup.style.display = "none";
+      gamePanel.classList.remove("active");
+      startPanel.classList.add("active");
+      playerNameInput.value = "";
+      scoreLimitInput.value = "";
+      playerHand.textContent = "❔";
+      computerHand.textContent = "❔";
+      gameContent.classList.remove("blurred");
+      enableChoices();
     });
   </script>
 
