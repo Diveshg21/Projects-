@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Random Duel</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(to right, #1f1c2c, #928dab);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .blur {
+      filter: blur(5px);
+      pointer-events: none;
+    }
+    .container {
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 0 20px #000;
+      color: white;
+      position: relative;
+    }
+    h1, h2 {
+      margin-bottom: 10px;
+    }
+    .panel, .game, .result {
+      display: none;
+    }
+    .btn {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 30px;
+      background: #ff4757;
+      color: white;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #ff6b81;
+    }
+    select {
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 1em;
+      margin-top: 10px;
+    }
+    .circle-btn {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: #1e90ff;
+      color: white;
+      font-size: 1.5em;
+      border: none;
+      margin: 20px auto;
+      display: block;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .circle-btn:active {
+      transform: scale(0.95);
+    }
+    .scoreboard {
+      font-size: 1.2em;
+      margin: 10px 0;
+    }
+    .highlight {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 12px;
+      background: #2ecc71;
+      font-size: 1.5em;
+      margin: 10px 0;
+      box-shadow: 0 0 10px #2ecc71;
+    }
+    .countdown {
+      font-size: 2em;
+      margin: 15px 0;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+    .rules {
+      font-size: 0.95em;
+      text-align: left;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="mainContainer">
+  <div class="panel" id="startPanel">
+    <h1>Random Duel</h1>
+    <label>Choose Score Limit:</label>
+    <select id="scoreLimit">
+      <option value="0" selected>0</option>
+      <option value="1">1</option>
+      <option value="3">3</option>
+      <option value="5">5</option>
+      <option value="7">7</option>
+    </select>
+    <br/>
+    <button class="btn" onclick="startGame()">Start Game</button>
+  </div>
+
+  <div class="panel" id="rulesPanel">
+    <h2>Rules</h2>
+    <div class="rules">
+      <ul>
+        <li>Tap the circle to begin a duel round.</li>
+        <li>You'll both get random numbers (1-20).</li>
+        <li>Whoever gets the higher number scores a point.</li>
+        <li>First to reach the chosen score limit wins!</li>
+      </ul>
+    </div>
+    <button class="btn" onclick="startDuel()">Continue</button>
+  </div>
+
+  <div class="game" id="gamePanel">
+    <h2>Duel Time!</h2>
+    <div class="scoreboard">
+      You: <span id="playerScore">0</span> | Computer: <span id="compScore">0</span>
+    </div>
+    <div id="countdown" class="countdown" style="display:none;">Rolling...</div>
+    <div class="scoreboard">
+      You got: <span id="playerNum" class="highlight">-</span><br/>
+      Computer got: <span id="compNum" class="highlight">-</span>
+    </div>
+    <button class="circle-btn" onclick="startRoll()">TAP</button>
+    <button class="btn" onclick="goHome()">Home</button>
+  </div>
+
+  <div class="result" id="resultPanel">
+    <h2 id="winnerText"></h2>
+    <button class="btn" onclick="goHome()">Go Home</button>
+  </div>
+</div>
+
+<audio id="partyPop" src="https://www.soundjay.com/misc/sounds/party-popper-1.mp3"></audio>
+<audio id="winSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
+<audio id="tapSound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+
+<script>
+  let playerScore = 0;
+  let compScore = 0;
+  let scoreLimit = 5;
+
+  function startGame() {
+    scoreLimit = parseInt(document.getElementById('scoreLimit').value);
+    document.getElementById('startPanel').style.display = 'none';
+    document.getElementById('rulesPanel').style.display = 'block';
+  }
+
+  function startDuel() {
+    playerScore = 0;
+    compScore = 0;
+    document.getElementById('playerScore').textContent = 0;
+    document.getElementById('compScore').textContent = 0;
+    document.getElementById('playerNum').textContent = "-";
+    document.getElementById('compNum').textContent = "-";
+    document.getElementById('rulesPanel').style.display = 'none';
+    document.getElementById('gamePanel').style.display = 'block';
+    document.getElementById('mainContainer').classList.remove('blur');
+  }
+
+  function startRoll() {
+    document.getElementById("tapSound").play();
+    document.getElementById('countdown').style.display = 'block';
+    document.getElementById('playerNum').textContent = "-";
+    document.getElementById('compNum').textContent = "-";
+    document.getElementById('playerNum').style.background = "#34495e";
+    document.getElementById('compNum').style.background = "#34495e";
+    setTimeout(playRound, 1500);
+  }
+
+  function playRound() {
+    document.getElementById('countdown').style.display = 'none';
+    let player = Math.floor(Math.random() * 20) + 1;
+    let comp = Math.floor(Math.random() * 20) + 1;
+    document.getElementById('playerNum').textContent = player;
+    document.getElementById('compNum').textContent = comp;
+    document.getElementById('playerNum').style.background = "#2ecc71";
+    document.getElementById('compNum').style.background = "#e67e22";
+
+    if (player > comp) {
+      playerScore++;
+    } else if (comp > player) {
+      compScore++;
+    }
+    document.getElementById('playerScore').textContent = playerScore;
+    document.getElementById('compScore').textContent = compScore;
+
+    checkWinner();
+  }
+
+  function checkWinner() {
+    if (playerScore >= scoreLimit) {
+      document.getElementById("winSound").play();
+      document.getElementById('winnerText').textContent = "You Win!";
+      showResult();
+    } else if (compScore >= scoreLimit) {
+      document.getElementById("partyPop").play();
+      document.getElementById('winnerText').textContent = "Computer Wins!";
+      showResult();
+    }
+  }
+
+  function showResult() {
+    document.getElementById('gamePanel').style.display = 'none';
+    document.getElementById('resultPanel').style.display = 'block';
+  }
+
+  function goHome() {
+    document.getElementById('startPanel').style.display = 'block';
+    document.getElementById('rulesPanel').style.display = 'none';
+    document.getElementById('gamePanel').style.display = 'none';
+    document.getElementById('resultPanel').style.display = 'none';
+    document.getElementById('mainContainer').classList.remove('blur');
+  }
+
+  window.onload = () => {
+    document.getElementById('startPanel').style.display = 'block';
+  };
+</script>
+
+</body>
+</html>
