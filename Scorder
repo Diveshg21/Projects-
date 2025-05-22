@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scorder</title>
+ <style>
+   
+   * { 
+
+  box-sizing: border-box; 
+
+  margin: 0; 
+
+  padding: 0; 
+
+  user-select: none; 
+
+}
+
+body {
+  top:50%;
+
+  font-family: 'Segoe UI', sans-serif;
+
+  background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  min-height: 100vh;
+
+  padding: 20px;
+
+}
+
+h1 {
+
+  color: #0f3057; 
+
+  margin-bottom: 20px;
+
+  font-size: 2.5rem; 
+
+  text-shadow: 1px 1px 2px rgba(0,0,0,.2);
+
+}
+
+.panel {
+
+  background: #fff; 
+
+  border-radius: 16px;
+
+  box-shadow: 0 8px 24px rgba(0,0,0,.1);
+
+  padding: 24px; 
+
+  width: 100%; 
+
+  max-width: 400px;
+
+  text-align: center; 
+
+  margin-bottom: 20px;
+
+}
+
+.hidden { 
+
+  display: none; 
+
+}
+
+.highlight {
+
+  background: #0f3057;
+
+  color: #fff;
+
+  padding: 6px 12px;
+
+  border-radius: 12px;
+
+  font-weight: 700;
+
+  margin-bottom: 12px;
+
+  display: inline-block;
+
+}
+
+button {
+
+  cursor: pointer; 
+
+  border: none; 
+
+  outline: none;
+
+  transition: transform .1s ease; 
+
+  touch-action: manipulation;
+
+}
+
+.start-btn {
+
+  background: linear-gradient(to right, #00b09b, #96c93d);
+
+  color: #fff;
+
+  border-radius: 8px;
+
+  padding: 12px 24px;
+
+  font-size: 1.1rem;
+
+  font-weight: 600;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+
+  margin: 8px;
+
+}
+
+.start-btn:active { 
+
+  transform: scale(.96); 
+
+}
+
+.choices {
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  margin-top: 16px;
+
+}
+
+.choices button {
+
+  font-size: 1.8rem;
+
+  width: 56px;
+
+  height: 56px;
+
+  margin: 8px;
+
+  border-radius: 50%;
+
+  background: linear-gradient(145deg, #ff758c, #ff7eb3);
+
+  color: #fff;
+
+  box-shadow: 0 6px 16px rgba(0,0,0,.1);
+
+}
+
+.choices button:disabled { 
+
+  opacity: 0.5; 
+
+}
+
+.choices button:active { 
+
+  transform: scale(.92); 
+
+}
+
+.bold { 
+
+  font-weight: 700; 
+
+  color: #333; 
+
+  margin: 8px 0; 
+
+}
+
+#turn-label { 
+
+  font-size: 1.2rem; 
+
+  color: #0f3057; 
+
+  margin: 12px 0; 
+
+}
+
+#info {
+
+  font-size: 1.1rem; 
+
+  margin: 10px 20px; 
+
+  min-height: 1.2em; 
+
+  color: #444;
+
+}
+
+#countdown {
+
+  position: fixed;
+
+  top: 50%;
+
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  background: rgba(255,255,255,0.95);
+
+  padding: 20px 30px;
+
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+
+  border-radius: 12px;
+
+  font-size: 1.8rem;
+
+  font-weight: 700;
+
+  display: none;
+
+  z-index: 1000;
+
+  text-align: center;
+
+}
+
+/* Home button style */
+
+#home-btn {
+
+  margin-top: 16px;
+
+}
+
+.msg-box {
+
+  position: fixed;
+
+  top: 50%;
+
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  background: rgba(255, 255, 255, 0.95);
+
+  padding: 20px 20px;
+
+  border-radius: 10px;
+
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+
+  z-index: 999;
+
+  text-align: center;
+
+  font-size: 16px;
+
+  max-width: 90%;
+
+}
+
+.msg-box button {
+
+  margin-top: 15px;
+
+  padding: 8px 20px;
+
+  font-size: 16px;
+
+  background-color: #4CAF50;
+
+  border: none;
+
+  color: white;
+
+  border-radius: 5px;
+
+  cursor: pointer;
+
+}
+#messageBox {
+
+  width: 400px;     /* Increase width as needed */
+
+  height: 155px;    /* Increase height as needed */
+
+  padding: 20px;    /* Add padding inside the box */
+
+  font-size: 18px;  /* Make text larger */
+
+  /* Optional: center box on screen */
+
+  position: fixed;
+
+  top: 50%;
+
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  background-color: white;
+
+  border: 2px solid #333;
+
+  box-shadow: 0 0 20px rgba(0,0,0,0.14);
+
+  z-index: 1000;
+  backdrop-filter: blur(105px);
+  color: royalblue;
+
+}
+
+.backdrop {
+
+  position: fixed;
+
+  top: 0;
+
+  left: 0;
+
+  width: 100%;
+
+  height: 100%;
+
+  backdrop-filter: blur(5px);
+
+  background-color: rgba(0, 0, 0, 0.4);
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  z-index: 999;
+
+}
+
+.msg-box {
+
+  background: white;
+
+  padding: 20px 30px;
+
+  border-radius: 10px;
+
+  width: 400px;
+
+  max-width: 90%;
+
+  text-align: center;
+
+  font-size: 18px;
+
+}
+.backdrop.hidden {
+
+  display: none !important;
+
+}
+#rules-btn {
+
+  font-size: 1.2rem;
+
+  padding: 12px 24px;
+
+  border-radius: 10px;
+
+  background-color: #ffcc00;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+}
+
+#rules-btn:hover {
+
+  background-color: #ffaa00;
+
+  transform: scale(1.05);
+
+  transition: 0.2s ease;
+
+}
+   
+ </style>
+</head>
+<body>
+  <h1>Scorder</h1>
+
+  <!-- START PANEL -->
+  <div id="start-panel" class="panel">
+    <p class="bold">👤You VS 🤖AI</p>
+    <p class="bold">
+      Tap “Start” to begin<br /><br />
+      Note: If the game goes too long click home button!!
+    </p>
+    <button class="start-btn" id="start-btn">Start</button>
+  </div>
+
+  <!-- RULES BACKDROP -->
+  <div id="backdrop" class="backdrop hidden">
+    <div id="messageBox" class="msg-box">
+      <p>
+        If you and the computer have the same sign, you lose<br />
+        If you have different signs, you secure a point.
+      </p>
+      <button id="close-msg-btn">OK</button>
+    </div>
+  </div>
+
+  <!-- GAME PANEL -->
+  <div id="game-panel" class="panel hidden">
+    <p id="turn-label">Your's Turn</p>
+    <p id="info"></p>
+    <div class="choices" id="player-buttons">
+      <button onclick="takeTurn(0)">✊🏻</button>
+      <button onclick="takeTurn(1)">☝🏻</button>
+      <button onclick="takeTurn(2)">✌🏻</button>
+      <button onclick="takeTurn(3)">👌🏻</button>
+      <button onclick="takeTurn(4)">🖖🏻</button>
+      <button onclick="takeTurn(5)">🖐🏻</button>
+      <button onclick="takeTurn(6)">👍🏻</button>
+    </div>
+    <p class="bold">Your Score: <span id="player-score">0</span></p>
+    <p class="bold">Computer Score: <span id="computer-score">0</span></p>
+  </div>
+
+  <!-- HOME BUTTON -->
+  <button id="home-btn" class="start-btn hidden" onclick="goHome()">Home</button>
+
+  <!-- RESULT PANEL -->
+  <div id="result-panel" class="panel hidden">
+    <h2 id="winner-message"></h2>
+    <button class="start-btn" onclick="restart()">OK</button>
+  </div>
+
+  <!-- COUNTDOWN OVERLAY -->
+  <div id="countdown">Checking wait...<span id="cd">3</span>…</div>
+
+  <script>
+    
+    const emojis = ["✊🏻", "☝🏻", "✌🏻", "👌🏻", "🖖🏻", "🖐🏻", "👍🏻"];
+
+let playerScore = 0, computerScore = 0;
+let secondInnings = false, gameOver = false;
+
+const homeBtn = document.getElementById('home-btn');
+const messageBox = document.getElementById('messageBox');
+const backdrop = document.getElementById('backdrop');
+
+function showRules() {
+  backdrop.classList.remove('hidden');
+  messageBox.classList.remove('hidden');
+  disableButtons();
+}
+
+function hideRules() {
+  backdrop.classList.add('hidden');
+  messageBox.classList.add('hidden');
+  enableButtons();
+}
+
+function startGame() {
+  hideRules();
+  document.getElementById('start-panel').classList.add('hidden');
+  document.getElementById('game-panel').classList.remove('hidden');
+  homeBtn.classList.remove('hidden');
+
+  updateInfo("⚠️Previous hands will appear here!⚠️");
+  updateTurn("Your Turn");
+  enableButtons();
+
+  gameOver = false;
+  secondInnings = false;
+  playerScore = 0;
+  computerScore = 0;
+  updateScores();
+}
+
+function takeTurn(playerHand) {
+  if (gameOver) return;
+  disableButtons();
+
+  const compHand = Math.floor(Math.random() * emojis.length);
+  updateInfo(`👤 You chose: ${emojis[playerHand]} | 🤖 Computer chose: ${emojis[compHand]}`);
+
+  runCountdown(3, () => {
+    if (playerHand === compHand) {
+      if (!secondInnings) {
+        secondInnings = true;
+        updateTurn("Computer Turn");
+        updateInfo("DRS taken🎥 | You lose!! | Switched innings!");
+         } else {
+        finishGame();
+        return;
+      }
+    } else {
+      if (!secondInnings) {
+        playerScore += playerHand;
+        updateScores();
+      } else {
+        computerScore += compHand;
+        updateScores();
+        if (computerScore > playerScore) {
+          finishGame();
+          return;
+        }
+      }
+    }
+
+    updateTurn(!secondInnings ? "Your Turn" : "Computer's Turn");
+    enableButtons();
+  });
+}
+
+function updateTurn(text) {
+  document.getElementById('turn-label').textContent = text;
+}
+
+function updateInfo(text) {
+  document.getElementById('info').textContent = text;
+}
+
+function updateScores() {
+  document.getElementById('player-score').textContent = playerScore;
+  document.getElementById('computer-score').textContent = computerScore;
+}
+
+function runCountdown(seconds, callback) {
+  const cd = document.getElementById('countdown');
+  const span = document.getElementById('cd');
+  let timeLeft = seconds;
+
+  span.textContent = timeLeft;
+  cd.style.display = 'block';
+
+  const interval = setInterval(() => {
+    timeLeft--;
+    if (timeLeft < 0) {
+      clearInterval(interval);
+      cd.style.display = 'none';
+      callback();
+    } else {
+      span.textContent = timeLeft;
+    }
+  }, 1000);
+}
+
+function disableButtons() {
+  document.querySelectorAll('.choices button').forEach(btn => btn.disabled = true);
+}
+
+function enableButtons() {
+  document.querySelectorAll('.choices button').forEach(btn => btn.disabled = false);
+}
+
+function finishGame() {
+  gameOver = true;
+  document.getElementById('game-panel').classList.add('hidden');
+  document.getElementById('result-panel').classList.remove('hidden');
+  homeBtn.classList.add('hidden');
+
+  const msg = playerScore > computerScore
+    ? `You Won! ${playerScore} – ${computerScore}`
+    : playerScore < computerScore
+      ? `Computer Won! ${computerScore} – ${playerScore}`
+      : `It's a Draw! ${playerScore} – ${computerScore}`;
+
+  document.getElementById('winner-message').textContent = msg;
+}
+
+function restart() {
+  playerScore = 0;
+  computerScore = 0;
+  secondInnings = false;
+  gameOver = false;
+
+  updateScores();
+  document.getElementById('result-panel').classList.add('hidden');
+  document.getElementById('start-panel').classList.remove('hidden');
+  updateInfo('');
+  updateTurn("Your Turn");
+  enableButtons();
+  homeBtn.classList.add('hidden');
+}
+
+function goHome() {
+  restart();
+  document.getElementById('game-panel').classList.add('hidden');
+}
+
+// Event listeners for buttons (ensure these buttons exist in your HTML)
+document.getElementById('start-btn')?.addEventListener('click', () => {
+  showRules();
+});
+
+document.getElementById('close-msg-btn')?.addEventListener('click', () => {
+  hideRules();
+  startGame();
+});
+
+homeBtn.addEventListener('click', goHome);
+    
+    
+  </script>
+</body>
+</html>
