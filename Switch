@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Simple switch with led indicator | codingstella</title>
-
+<style>
 *,
 ::before,
 ::after {
@@ -199,7 +199,7 @@ body {
 
 
 
-  
+  </style>
 </head>
 <body>
 
