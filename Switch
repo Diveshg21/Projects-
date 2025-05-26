@@ -3,9 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Simple switch with led indicator | codingstella</title>
-  <link rel="stylesheet" href="./style.css">
-</head>
-
 
 *,
 ::before,
@@ -201,6 +198,9 @@ body {
 
 
 
+
+  
+</head>
 <body>
 
 <div class="switch">
